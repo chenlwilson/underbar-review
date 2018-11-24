@@ -311,17 +311,15 @@
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-    var obj = {};
-
+    var container = {};
     return function() {
       var key = JSON.stringify(arguments);
-      if (obj[key] == undefined) {
-        obj[key] = func.apply(this, arguments);
+      if (!container[key]) {
+        container[key] = func.apply(this, arguments);
       }
-      return obj[key];
+      return container[key];
     }
-
-  };
+  }
 
   // Delays a function for the given number of milliseconds, and then calls
   // it with the arguments supplied.
@@ -350,18 +348,31 @@
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
-    var randObj = {};
-    var result = [];
-    for(var i = 0; i < array.length; i++){
-      var rand = Math.floor(Math.random() * array.length);//0-arrLength
-      while(randObj[rand] != undefined){
-        var rand = Math.floor(Math.random() * array.length);//0-arrLength
+    var randomArr = [];
+    for (var i = 0; i < array.length; i++) {
+      var index = Math.floor(Math.random() * array.length);
+      while (randomArr[index] !== undefined) {
+        var index = Math.floor(Math.random() * array.length);
       }
-      randObj[rand] = array[rand];
-      result.push(randObj[rand]);
+      randomArr[index] = array[i];
     }
-    return result;
-  };
+    return randomArr;
+  }
+
+
+  // _.shuffle = function(array) {
+  //   var randObj = {};
+  //   var result = [];
+  //   for(var i = 0; i < array.length; i++){
+  //     var rand = Math.floor(Math.random() * array.length);//0-arrLength
+  //     while(randObj[rand] != undefined){
+  //       var rand = Math.floor(Math.random() * array.length);//0-arrLength
+  //     }
+  //     randObj[rand] = array[rand];
+  //     result.push(randObj[rand]);
+  //   }
+  //   return result;
+  // };
 
 
   /**
@@ -375,6 +386,16 @@
   // Calls the method named by functionOrKey on each value in the list.
   // Note: You will need to learn a bit about .apply to complete this.
   _.invoke = function(collection, functionOrKey, args) {
+    //collection = [dog, cat]
+    //reverse is a function
+    //reverse is a (string) method
+    return _.map(collection, function(item) {
+      if (typeof functionOrKey === 'function') {
+        return functionOrKey.apply(item, args);
+      } else {
+        return item[functionOrKey].apply(item, args);
+      }
+    })
   };
 
   // Sort the object's values by a criterion produced by an iterator.
@@ -382,6 +403,23 @@
   // of that string. For example, _.sortBy(people, 'name') should sort
   // an array of people by their name.
   _.sortBy = function(collection, iterator) {
+    var notValue = [];
+    var result = _.reduce(collection, function(result, item) {
+      if (item === undefined) {
+        notValue.push(undefined);
+        return result;
+      }
+      for (var i = 0; i < result.length; i++) {
+        if ((typeof iterator === 'function' && iterator(item) < iterator(result[i]))
+        || (typeof iterator === 'string' && item[iterator] < result[i][iterator])) {
+          result.splice(i, 0, item);
+          return result;
+        }
+      }
+      result.push(item);
+      return result;
+    }, []);
+    return result.concat(notValue);
   };
 
   // Zip together two or more arrays with elements of the same index
