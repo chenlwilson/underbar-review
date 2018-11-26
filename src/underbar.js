@@ -502,5 +502,26 @@
   //
   // Note: This is difficult! It may take a while to implement.
   _.throttle = function(func, wait) {
+    // var inThrottle;
+    // return function() {
+    //   if (!inThrottle) {
+    //     inThrottle = true;
+    //     setTimeout(function() {
+    //       inThrottle = false
+    //     }, wait);
+    //     func.apply(this, arguments);
+    //   }
+    // }
+
+    let inThrottle;
+    return () => {
+      if (!inThrottle) {
+        inThrottle = true;
+        setTimeout(() => inThrottle = false, wait);
+        func.apply(this, arguments);
+      }
+    }
+
   };
+
 }());
